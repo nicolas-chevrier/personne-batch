@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: personne-batch
+  main:
+    web-application-type: none
+  datasource:
+    # reWriteBatchedInserts : le pilote regroupe les INSERT d'un lot JDBC en une seule requête.
+    url: ${PERSONNE_DB_URL:jdbc:postgresql://localhost:5432/personnes?reWriteBatchedInserts=true}
+    username: ${PERSONNE_DB_USERNAME:personne}
+    password: ${PERSONNE_DB_PASSWORD:personne}
+  jpa:
+    hibernate:
+      # Le schéma vient de schema.sql : Hibernate vérifie seulement qu'il correspond aux entités.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          # Les INSERT d'un chunk partent par lots plutôt qu'un par un.
+          batch_size: 100
+  sql:
+    init:
+      # schema.sql et data.sql sont rejouables : ils ne créent que ce qui manque.
+      mode: always
+  batch:
+    job:
+      # Le job est lancé par ImportPersonnesJobRunner.
+      enabled: false
+    jdbc:
+      # Tables de métadonnées Spring Batch : reprise sur erreur et historique des durées.
+      initialize-schema: always
+
+personne:
+  batch:
+    fichier: ./input/personnes.csv
+    # Nombre de lignes lues, converties puis écrites dans une même transaction.
+    chunk-size: 500
+    # Une seule ligne rejetée annule l'import. La lecture continue quand même, pour signaler
+    # toutes les lignes fautives, jusqu'à ce nombre de rejets.
+    skip-limit: 100

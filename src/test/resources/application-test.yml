@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    # Base dédiée : les tests d'intégration vident les tables avant chaque test.
+    url: ${PERSONNE_DB_TEST_URL:jdbc:postgresql://localhost:5432/personnes_test?reWriteBatchedInserts=true}
+
+personne:
+  batch:
+    runner:
+      # Les tests lancent le job eux-mêmes.
+      enabled: false
